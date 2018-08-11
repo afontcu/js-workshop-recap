@@ -1,0 +1,6 @@
+[Parallel vs. Async](parallel-vs-async.md)
+[Callbacks and inversion of control](callbacks-ioc.md)
+[Thunks](thunks.md)
+[Promises](promises.md)
+[Generators](generators.md)
+[Observables](observables.md)
