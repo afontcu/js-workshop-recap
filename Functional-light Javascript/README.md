@@ -1,5 +1,12 @@
 # Functional-light Javascript
 
+Functional Programming can be an intimidating topic. Luckily we took a fairly
+comfortable approach, building small blocks of knowledge and experience the
+real application of them, instead of going full-theoretical.
+
+
+## Table of contents
+
 1. [Functions and procedures](functions-and-procedures.md)
 2. [Unary functions](unary-functions.md)
 3. [Point-free style](point-free-style.md)
