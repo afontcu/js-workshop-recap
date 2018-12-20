@@ -1,0 +1,245 @@
+var App = (function setupApp(){									   |	var Helpers = {
+												   >		maxVisibleWorkDescriptionLength: 20,
+												   >		minWorkDescriptionLength: 5,
+												   >		maxWorkTime: 600,
+												   >
+												   >		validateWorkEntry(description,minutes) {
+												   >			if (description.length < Helpers.minWorkDescriptionLength) return false;
+												   >			if (
+												   >				/^\s*$/.test(minutes) ||
+												   >				Number.isNaN(Number(minutes)) ||
+												   >				minutes < 0 ||
+												   >				minutes > Helpers.maxWorkTime
+												   >			) {
+												   >				return false;
+												   >			}
+												   >
+												   >			return true;
+												   >		},
+												   >		formatWorkDescription(description) {
+												   >			if (description.length > Helpers.maxVisibleWorkDescriptionLength) {
+												   >				description = `${description.substr(0,Helpers.maxVisibleWorkDescriptionL
+												   >			}
+												   >			return description;
+												   >		},
+												   >		formatTime(time) {
+												   >			var hours = Math.floor(time / 60);
+												   >			var minutes = time % 60;
+												   >			if (hours == 0 && minutes == 0) return "";
+												   >			if (minutes < 10) minutes = `0${minutes}`;
+												   >			return `${hours}:${minutes}`;
+												   >		}
+												   >	};
+												   >
+												   >
+												   >	// ****************************************************************
+												   >	// ****************************************************************
+												   >
+												   >
+												   >	function setupUI() {
+	const maxVisibleWorkDescriptionLength = 20;						   <
+	const minWorkDescriptionLength = 5;							   <
+	const maxWorkTime = 600;								   <
+												   <
+	var projects = [];									   <
+												   >		var projectElements = {};
+												   >		var workElements = {};
+												   >
+		addProject: addProject,								   |			addProjectToList: addProjectToList,
+		addWorkToProject: addWorkToProject						   |			addProjectSelection: addProjectSelection,
+												   >			addWorkEntryToList: addWorkEntryToList,
+												   >			updateProjectTotalTime: updateProjectTotalTime,
+												   >			updateWorkLogTotalTime: updateWorkLogTotalTime
+		if (!validateWorkEntry(description,minutes)) {					   |			if (!Helpers.validateWorkEntry(description,minutes)) {
+		addWorkToProject(Number(projectId),description,Number(minutes));		   |			App.addWorkToProject(Number(projectId),description,Number(minutes));
+	function validateWorkEntry(description,minutes) {					   |		function addProjectToList(projectId,projectDescription) {
+		if (description.length < minWorkDescriptionLength) return false;		   |			var $project = $(projectTemplate);
+		if (										   |			$project.attr("data-project-id",projectId);
+			/^\s*$/.test(minutes) ||						   |			$project.find("[rel*=js-project-description]").text(projectDescription);
+			Number.isNaN(Number(minutes)) ||					   |			$projectList.append($project);
+			minutes < 0 ||								   |			projectElements[projectId] = $project;
+			minutes > maxWorkTime							   <
+		) {										   <
+			return false;								   <
+		return true;									   |		function addProjectSelection(projectId,projectDescription) {
+												   >			var $option = $("<option></option>");
+												   >			$option.attr("value",projectId);
+												   >			$option.text(projectDescription);
+												   >			$workEntrySelectProject.append($option);
+												   >		}
+												   >
+												   >		function addWorkEntryToList(projectId,workEntryData) {
+												   >			var $projectEntry = projectElements[projectId];
+												   >			var $projectWorkEntries = $projectEntry.find("[rel*=js-work-entries]");
+												   >
+												   >			// create a new DOM element for the work entry
+												   >			var $workEntry = $(workEntryTemplate);
+												   >			$workEntry.attr("data-work-entry-id",workEntryData.id);
+												   >			$workEntry.find("[rel*=js-work-time]").text(Helpers.formatTime(workEntryData.tim
+												   >			setupWorkDescription(workEntryData,$workEntry.find("[rel*=js-work-description]")
+												   >
+												   >			workElements[workEntryData.id] = $workEntry;
+												   >
+												   >			// multiple work entries now?
+												   >			if (App.getWorkEntryCount(projectId) > 1) {
+												   >				{ let adjacentWorkEntryId, insertBefore;
+												   >					[ adjacentWorkEntryId, insertBefore ] = App.getWorkEntryLocation
+												   >
+												   >					if (insertBefore) {
+												   >						workElements[adjacentWorkEntryId].before($workEntry);
+												   >					}
+												   >					else {
+												   >						workElements[adjacentWorkEntryId].after($workEntry);
+												   >					}
+												   >				}
+												   >			}
+												   >			// otherwise, just the first entry
+												   >			else {
+												   >				$projectEntry.addClass("visible");
+												   >				$projectWorkEntries.append($workEntry);
+												   >			}
+												   >		}
+												   >
+												   >		function setupWorkDescription(workEntryData,$workDescription) {
+												   >			$workDescription.text(Helpers.formatWorkDescription(workEntryData.description));
+												   >
+												   >			if (workEntryData.description.length > Helpers.maxVisibleWorkDescriptionLength) 
+												   >				$workDescription
+												   >					.addClass("shortened")
+												   >					.on("click",function onClick(){
+												   >						$workDescription
+												   >							.removeClass("shortened")
+												   >							.off("click",onClick)
+												   >							.text(workEntryData.description);
+												   >					});
+												   >			}
+												   >		}
+												   >
+												   >		function updateProjectTotalTime(projectId,projectTime) {
+												   >			var $projectEntry = projectElements[projectId];
+												   >			$projectEntry.find("> [rel*=js-work-time]").text(Helpers.formatTime(projectTime)
+												   >		}
+												   >
+												   >		function updateWorkLogTotalTime(time) {
+												   >			if (time > 0) {
+												   >				$totalTime.text(Helpers.formatTime(time)).show();
+												   >			else {
+												   >				$totalTime.text("").hide();
+												   >			}
+												   >		}
+												   >	}
+												   >
+												   >
+												   >	// ****************************************************************
+												   >	// ****************************************************************
+												   >
+												   >
+												   >	function setupApp(UI) {
+												   >		var projects = [];
+												   >		var totalTime = 0;
+												   >
+												   >		var publicAPI = {
+												   >			addProject: addProject,
+												   >			addWorkToProject: addWorkToProject,
+												   >			getWorkEntryCount: getWorkEntryCount,
+												   >			getWorkEntryLocation: getWorkEntryLocation
+												   >		};
+												   >
+												   >		return publicAPI;
+												   >
+												   >		// **************************
+		addProjectToList(projectEntryData);						   |			UI.addProjectToList(projectEntryData.id,projectEntryData.description);
+		addProjectSelection(projectEntryData);						   |			UI.addProjectSelection(projectEntryData.id,projectEntryData.description);
+	}											   <
+												   <
+	function addProjectToList(projectEntryData) {						   <
+		var $project = $(projectTemplate);						   <
+		$project.attr("data-project-id",projectEntryData.id);				   <
+		$project.find("[rel*=js-project-description]").text(projectEntryData.description   <
+		$projectList.append($project);							   <
+												   <
+		projectEntryData.$element = $project;						   <
+	}											   <
+												   <
+	function addProjectSelection(projectEntryData) {					   <
+		var $option = $("<option></option>");						   <
+		$option.attr("value",projectEntryData.id);					   <
+		$option.text(projectEntryData.description);					   <
+		$workEntrySelectProject.append($option);					   <
+		projects.time = (projects.time || 0) + minutes;					   |			totalTime = (totalTime || 0) + minutes;
+		addWorkEntryToList(projectEntryData,workEntryData);				   |			UI.addWorkEntryToList(projectId,workEntryData);
+		updateProjectTotalTime(projectEntryData);					   |			UI.updateProjectTotalTime(projectId,projectEntryData.time);
+		updateWorkLogTotalTime();							   |			UI.updateWorkLogTotalTime(totalTime);
+	function addWorkEntryToList(projectEntryData,workEntryData) {				   |		function getWorkEntryCount(projectId) {
+		var $projectEntry = projectEntryData.$element;					   |			var projectEntryData = findProjectEntry(projectId);
+		var $projectWorkEntries = $projectEntry.find("[rel*=js-work-entries]");		   |			return projectEntryData.work.length;
+												   |		}
+		// create a new DOM element for the work entry					   <
+		var $workEntry = $(workEntryTemplate);						   <
+		$workEntry.attr("data-work-entry-id",workEntryData.id);				   <
+		$workEntry.find("[rel*=js-work-time]").text(formatTime(workEntryData.time));	   <
+		setupWorkDescription(workEntryData,$workEntry.find("[rel*=js-work-description]")   <
+		workEntryData.$element = $workEntry;						   |		function getWorkEntryLocation(projectId,workEntryId) {
+												   >			var projectEntryData = findProjectEntry(projectId);
+		// multiple work entries now?							   <
+		if (projectEntryData.work.length > 1) {						   <
+			{ let entryIdx;								   <
+												   >			var entryIdx;
+					if (projectEntryData.work[i] === workEntryData) {	   |				if (projectEntryData.work[i].id == workEntryId) {
+					projectEntryData.work[entryIdx + 1].$element.before($wor   |				return [ projectEntryData.work[entryIdx + 1].id, /*insertBefore=*/true ]
+					projectEntryData.work[entryIdx - 1].$element.after($work   |				return [ projectEntryData.work[entryIdx - 1].id, /*insertBefore=*/false 
+		// otherwise, just the first entry						   <
+		else {										   <
+			$projectEntry.addClass("visible");					   <
+			$projectWorkEntries.append($workEntry);					   <
+		}										   <
+	}											   <
+												   <
+	function setupWorkDescription(workEntryData,$workDescription) {				   <
+		$workDescription.text(formatWorkDescription(workEntryData.description));	   <
+												   <
+		if (workEntryData.description.length > maxVisibleWorkDescriptionLength) {	   <
+		$workDescription								   <
+			.addClass("shortened")							   <
+			.on("click",function onClick(){						   <
+				$workDescription						   <
+					.removeClass("shortened")				   <
+					.off("click",onClick)					   <
+					.text(workEntryData.description);			   <
+			});									   <
+		}										   <
+	}											   <
+												   <
+	function updateProjectTotalTime(projectEntryData) {					   <
+		var $projectEntry = projectEntryData.$element;					   <
+		$projectEntry.find("> [rel*=js-work-time]").text(formatTime(projectEntryData.tim   <
+	}											   <
+												   <
+	function updateWorkLogTotalTime() {							   <
+		if (projects.time > 0) {							   <
+			$totalTime.text(formatTime(projects.time)).show();			   <
+		}										   <
+		else {										   <
+			$totalTime.text("").hide();						   <
+		}										   <
+	}											   <
+												   <
+	function formatWorkDescription(description) {						   <
+		if (description.length > maxVisibleWorkDescriptionLength) {			   <
+			description = `${description.substr(0,maxVisibleWorkDescriptionLength)}.   <
+		}										   <
+		return description;								   <
+	}											   <
+												   <
+	function formatTime(time) {								   <
+		var hours = Math.floor(time / 60);						   <
+		var minutes = time % 60;							   <
+		if (hours == 0 && minutes == 0) return "";					   <
+		if (minutes < 10) minutes = `0${minutes}`;					   <
+		return `${hours}:${minutes}`;							   <
+	}											   <
+})();												   <
+App.init();											   |	var UI = setupUI();
+												   >	UI.init();
+												   >
+												   >	var App = setupApp(UI);

@@ -1,0 +1,157 @@
+function setupUI() {										   |	var UI = Object.assign(Object.create(Helpers),{
+	const projectTemplate = "<div class='project-entry'><h3 class='project-description' rel=   |		projectTemplate: "<div class='project-entry'><h3 class='project-description' rel='js-pro
+	const workEntryTemplate = "<li class='work-entry'><span class='work-time' rel='js-work-t   |		workEntryTemplate: "<li class='work-entry'><span class='work-time' rel='js-work-time'></
+												   |
+	var $workEntryForm;									   |		init() {
+	var $workEntrySelectProject;								   |			this.projectElements = {};
+	var $workEntryDescription;								   |			this.workElements = {};
+	var $workEntryTime;									   |
+	var $workEntrySubmit;									   |			this.$workEntryForm = $("[rel*=js-work-entry-form]");
+	var $totalTime;										   |			this.$workEntrySelectProject = this.$workEntryForm.find("[rel*=js-select-project
+	var $projectList;									   |			this.$workEntryDescription = this.$workEntryForm.find("[rel*=js-work-description
+												   |			this.$workEntryTime = this.$workEntryForm.find("[rel*=js-work-time]");
+	var projectElements = {};								   |			this.$workEntrySubmit = this.$workEntryForm.find("[rel*=js-submit-work-entry]");
+	var workElements = {};									   |			this.$totalTime = $("[rel*=js-total-work-time]");
+												   |			this.$projectList = $("[rel*=js-project-list]");
+	var publicAPI = {									   |
+		init: initUI,									   |			this.$workEntrySubmit.on("click",this.submitNewWorkEntry.bind(this));
+		addProjectToList: addProjectToList,						   |		},
+		addProjectSelection: addProjectSelection,					   |
+		addWorkEntryToList: addWorkEntryToList,						   |		submitNewWorkEntry() {
+		updateProjectTotalTime: updateProjectTotalTime,					   |			var projectId = this.$workEntrySelectProject.val();
+		updateWorkLogTotalTime: updateWorkLogTotalTime					   |			var description = this.$workEntryDescription.val();
+	};											   |			var minutes = this.$workEntryTime.val();
+												   <
+	return publicAPI;									   <
+												   <
+												   <
+	// **************************								   <
+												   <
+	function initUI() {									   <
+		$workEntryForm = $("[rel*=js-work-entry-form]");				   <
+		$workEntrySelectProject = $workEntryForm.find("[rel*=js-select-project]");	   <
+		$workEntryDescription = $workEntryForm.find("[rel*=js-work-description]");	   <
+		$workEntryTime = $workEntryForm.find("[rel*=js-work-time]");			   <
+		$workEntrySubmit = $workEntryForm.find("[rel*=js-submit-work-entry]");		   <
+		$totalTime = $("[rel*=js-total-work-time]");					   <
+		$projectList = $("[rel*=js-project-list]");					   <
+		$workEntrySubmit.on("click",submitNewWorkEntry);				   |			if (!this.validateWorkEntry(description,minutes)) {
+	}											   <
+												   <
+	function submitNewWorkEntry() {								   <
+		var projectId = $workEntrySelectProject.val();					   <
+		var description = $workEntryDescription.val();					   <
+		var minutes = $workEntryTime.val();						   <
+												   <
+		if (!Helpers.validateWorkEntry(description,minutes)) {				   <
+			$workEntryDescription[0].focus();					   |				this.$workEntryDescription[0].focus();
+		$workEntryDescription.val("");							   |			this.$workEntryDescription.val("");
+		$workEntryTime.val("");								   |			this.$workEntryTime.val("");
+		App.addWorkToProject(Number(projectId),description,Number(minutes));		   |			this.addWorkToProject(Number(projectId),description,Number(minutes));
+		$workEntryDescription[0].focus();						   |			this.$workEntryDescription[0].focus();
+	}											   |		},
+	function addProjectToList(project) {							   |		addProjectToList(project) {
+		var $project = $(projectTemplate);						   |			var $project = $(this.projectTemplate);
+		$projectList.append($project);							   |			this.$projectList.append($project);
+		projectElements[projectId] = $project;						   |			this.projectElements[projectId] = $project;
+	}											   |		},
+	function addProjectSelection(project) {							   |		addProjectSelection(project) {
+		$workEntrySelectProject.append($option);					   |			this.$workEntrySelectProject.append($option);
+	}											   |		},
+	function addWorkEntryToList(project,workEntryData) {					   |		addWorkEntryToList(project,workEntryData) {
+		var $projectEntry = projectElements[projectId];					   |			var $projectEntry = this.projectElements[projectId];
+		var $workEntry = $(workEntryTemplate);						   |			var $workEntry = $(this.workEntryTemplate);
+		$workEntry.find("[rel*=js-work-time]").text(Helpers.formatTime(workEntryData.tim   |			$workEntry.find("[rel*=js-work-time]").text(this.formatTime(workEntryData.time))
+		setupWorkDescription(workEntryData,$workEntry.find("[rel*=js-work-description]")   |			this.setupWorkDescription(workEntryData,$workEntry.find("[rel*=js-work-descripti
+		workElements[workEntryData.id] = $workEntry;					   |			this.workElements[workEntryData.id] = $workEntry;
+					workElements[adjacentWorkEntryId].before($workEntry);	   |						this.workElements[adjacentWorkEntryId].before($workEntry
+					workElements[adjacentWorkEntryId].after($workEntry);	   |						this.workElements[adjacentWorkEntryId].after($workEntry)
+	}											   |		},
+	function setupWorkDescription(workEntryData,$workDescription) {				   |		setupWorkDescription(workEntryData,$workDescription) {
+		$workDescription.text(Helpers.formatWorkDescription(workEntryData.description));   |			$workDescription.text(this.formatWorkDescription(workEntryData.description));
+		if (workEntryData.description.length > Helpers.maxVisibleWorkDescriptionLength)    |			if (workEntryData.description.length > this.maxVisibleWorkDescriptionLength) {
+	}											   |		},
+	function updateProjectTotalTime(project) {						   |		updateProjectTotalTime(project) {
+		var $projectEntry = projectElements[projectId];					   |			var $projectEntry = this.projectElements[projectId];
+		$projectEntry.find("> [rel*=js-work-time]").text(Helpers.formatTime(projectTime)   |			$projectEntry.find("> [rel*=js-work-time]").text(this.formatTime(projectTime)).s
+	}											   |		},
+	function updateWorkLogTotalTime(time) {							   |		updateWorkLogTotalTime(time) {
+			$totalTime.text(Helpers.formatTime(time)).show();			   |				this.$totalTime.text(this.formatTime(time)).show();
+			$totalTime.text("").hide();						   |				this.$totalTime.text("").hide();
+		}										   <
+												   >	});
+function setupApp(UI) {										   |	var Application = Object.assign(Object.create(UI),{
+	var projects = [];									   |		addProject(description) {
+	var totalTime = 0;									   |			var project = setupProject(description);
+												   |			this.projects.push(project);
+	var publicAPI = {									   <
+		addProject: addProject,								   <
+		addWorkToProject: addWorkToProject						   <
+	};											   <
+												   <
+	return publicAPI;									   <
+												   <
+												   <
+	// **************************								   <
+	function addProject(description) {							   |			this.addProjectToList(project);
+		var project = new Project(description);						   |			this.addProjectSelection(project);
+		projects.push(project);								   |		},
+		UI.addProjectToList(project);							   |		findProjectEntry(projectId) {
+		UI.addProjectSelection(project);						   |			for (let i = 0; i < this.projects.length; i++) {
+	}											   |				if (this.projects[i].getId() === projectId) {
+												   |					return this.projects[i];
+	function findProjectEntry(projectId) {							   <
+		for (let i = 0; i < projects.length; i++) {					   <
+			if (projects[i].getId() === projectId) {				   <
+				return projects[i];						   <
+			}									   <
+												   >		},
+	function addWorkToProject(projectId,description,minutes) {				   |		addWorkToProject(projectId,description,minutes) {
+		totalTime = (totalTime || 0) + minutes;						   |			this.totalTime = (this.totalTime || 0) + minutes;
+		var project = findProjectEntry(projectId);					   |			var project = this.findProjectEntry(projectId);
+		UI.addWorkEntryToList(project,workEntryData);					   |			this.addWorkEntryToList(project,workEntryData);
+		UI.updateProjectTotalTime(project);						   |			this.updateProjectTotalTime(project);
+		UI.updateWorkLogTotalTime(totalTime);						   |			this.updateWorkLogTotalTime(this.totalTime);
+												   >	});
+												   >
+												   >	function setupApp() {
+												   >		var appInstance = Object.create(Application);
+												   >		appInstance.projects = [];
+												   >		appInstance.totalTime = 0;
+												   >
+												   >		return appInstance;
+function Project(description) {									   |	var Project = {
+	this.projectId = Math.round(Math.random()*1E4);						   |		getId() {
+	this.description = description;								   <
+	this.work = [];										   <
+	this.time = 0;										   <
+}												   <
+												   <
+												   <
+// **************************									   <
+												   <
+Project.prototype.getId = function getId(){							   <
+};												   |		},
+Project.prototype.getDescription = function getDescription(){					   |		getDescription() {
+};												   |		},
+Project.prototype.getTime = function getTime(){							   |		getTime() {
+};												   |		},
+Project.prototype.addWork = function addWork(workEntryData){					   |		addWork(workEntryData) {
+};												   |		},
+Project.prototype.getWorkEntryCount = function getWorkEntryCount(){				   |		getWorkEntryCount() {
+};												   |		},
+Project.prototype.getWorkEntryLocation = function getWorkEntryLocation(workEntryId){		   |		getWorkEntryLocation(workEntryId) {
+												   >		}
+												   >	function setupProject(description) {
+												   >		var projectInstance = Object.create(Project);
+												   >		projectInstance.projectId = Math.round(Math.random()*1E4);
+												   >		projectInstance.description = description;
+												   >		projectInstance.work = [];
+												   >		projectInstance.time = 0;
+												   >		return projectInstance;
+												   >	}
+												   >
+var UI = setupUI();										   |	var App = setupApp();
+UI.init();											   |	App.init();
+												   <
+var App = setupApp(UI);										   <
